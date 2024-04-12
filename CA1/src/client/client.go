@@ -21,7 +21,7 @@ func main() {
 	defer conn.Close()
 
 	c := orderingsystem.NewOrderManagementServiceClient(conn)
-	req := orderingsystem.OrderRequest{
+	req := orderingsystem.OrdersRequest{
 		OrdersIds: []string{
             "apple",
 			"cher",

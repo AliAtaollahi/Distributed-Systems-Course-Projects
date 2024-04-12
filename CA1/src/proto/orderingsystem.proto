@@ -5,14 +5,14 @@ package orderingsystem;
 option go_package = "./orderingsystem";
 
 service OrderManagementService {
-    rpc GetOrder(OrderRequest) returns (OrderResponse);
+    rpc GetOrder(OrdersRequest) returns (OrdersResponse);
 }
 
-message OrderRequest {
+message OrdersRequest {
     repeated string orders_ids = 1;
 }
 
-message OrderResponse {
+message OrdersResponse {
     repeated string orders = 1;
     string timestamp = 2;
 }

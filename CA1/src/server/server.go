@@ -19,7 +19,7 @@ type Server struct {
 	orderingsystem.UnimplementedOrderManagementServiceServer
 }
 
-func (s *Server) GetOrder(ctx context.Context, request *orderingsystem.OrderRequest) (*orderingsystem.OrderResponse, error){
+func (s *Server) GetOrder(ctx context.Context, request *orderingsystem.OrdersRequest) (*orderingsystem.OrdersResponse, error){
 	log.Printf("Received message body from client: %v", request)
 	selectedOrders := []string{}
 	for _, reqOrder := range request.OrdersIds {
@@ -30,7 +30,7 @@ func (s *Server) GetOrder(ctx context.Context, request *orderingsystem.OrderRequ
 		}
 	}
 	currentTime := time.Now()
-	return &orderingsystem.OrderResponse{Orders: selectedOrders, Timestamp: strconv.FormatInt(currentTime.UnixNano(), 10)}, nil
+	return &orderingsystem.OrdersResponse{Orders: selectedOrders, Timestamp: strconv.FormatInt(currentTime.UnixNano(), 10)}, nil
 }
 
 

@@ -22,7 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type OrderManagementServiceClient interface {
-	GetOrder(ctx context.Context, in *OrderRequest, opts ...grpc.CallOption) (*OrderResponse, error)
+	GetOrder(ctx context.Context, in *OrdersRequest, opts ...grpc.CallOption) (*OrdersResponse, error)
 }
 
 type orderManagementServiceClient struct {
@@ -33,8 +33,8 @@ func NewOrderManagementServiceClient(cc grpc.ClientConnInterface) OrderManagemen
 	return &orderManagementServiceClient{cc}
 }
 
-func (c *orderManagementServiceClient) GetOrder(ctx context.Context, in *OrderRequest, opts ...grpc.CallOption) (*OrderResponse, error) {
-	out := new(OrderResponse)
+func (c *orderManagementServiceClient) GetOrder(ctx context.Context, in *OrdersRequest, opts ...grpc.CallOption) (*OrdersResponse, error) {
+	out := new(OrdersResponse)
 	err := c.cc.Invoke(ctx, "/orderingsystem.OrderManagementService/GetOrder", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -46,7 +46,7 @@ func (c *orderManagementServiceClient) GetOrder(ctx context.Context, in *OrderRe
 // All implementations must embed UnimplementedOrderManagementServiceServer
 // for forward compatibility
 type OrderManagementServiceServer interface {
-	GetOrder(context.Context, *OrderRequest) (*OrderResponse, error)
+	GetOrder(context.Context, *OrdersRequest) (*OrdersResponse, error)
 	mustEmbedUnimplementedOrderManagementServiceServer()
 }
 
@@ -54,7 +54,7 @@ type OrderManagementServiceServer interface {
 type UnimplementedOrderManagementServiceServer struct {
 }
 
-func (UnimplementedOrderManagementServiceServer) GetOrder(context.Context, *OrderRequest) (*OrderResponse, error) {
+func (UnimplementedOrderManagementServiceServer) GetOrder(context.Context, *OrdersRequest) (*OrdersResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetOrder not implemented")
 }
 func (UnimplementedOrderManagementServiceServer) mustEmbedUnimplementedOrderManagementServiceServer() {
@@ -72,7 +72,7 @@ func RegisterOrderManagementServiceServer(s grpc.ServiceRegistrar, srv OrderMana
 }
 
 func _OrderManagementService_GetOrder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(OrderRequest)
+	in := new(OrdersRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -84,7 +84,7 @@ func _OrderManagementService_GetOrder_Handler(srv interface{}, ctx context.Conte
 		FullMethod: "/orderingsystem.OrderManagementService/GetOrder",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OrderManagementServiceServer).GetOrder(ctx, req.(*OrderRequest))
+		return srv.(OrderManagementServiceServer).GetOrder(ctx, req.(*OrdersRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
