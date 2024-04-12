@@ -20,7 +20,7 @@ type Server struct {
 }
 
 func (s *Server) GetOrder(ctx context.Context, request *orderingsystem.OrdersRequest) (*orderingsystem.OrdersResponse, error){
-	log.Printf("Received message body from client: %v", request)
+	log.Printf("Received message body from client for method `GetOrder`: %v", request)
 	selectedOrders := []string{}
 	for _, reqOrder := range request.OrdersIds {
 		for _, order := range s.orders {
@@ -31,6 +31,22 @@ func (s *Server) GetOrder(ctx context.Context, request *orderingsystem.OrdersReq
 	}
 	currentTime := time.Now()
 	return &orderingsystem.OrdersResponse{Orders: selectedOrders, Timestamp: strconv.FormatInt(currentTime.UnixNano(), 10)}, nil
+}
+
+func (s *Server) SearchOrders(request *orderingsystem.OrdersRequest, stream orderingsystem.OrderManagementService_SearchOrdersServer) error{
+	log.Printf("Received message body from client for method `SearchOrders`: %v", request)
+	for _, reqOrder := range request.OrdersIds {
+		for _, order := range s.orders {
+			if strings.Contains(order, reqOrder) {
+				currentTime := time.Now()
+				if err := stream.Send(&orderingsystem.OrderResponse{OrderId: order, Timestamp: strconv.FormatInt(currentTime.UnixNano(), 10)}); err != nil {
+					return err
+				  }
+			}
+		}
+	}
+	
+	return nil
 }
 
 

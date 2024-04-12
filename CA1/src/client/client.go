@@ -2,6 +2,7 @@ package main
 
 import (
 	"dist-projects/ca1/src/orderingsystem"
+	"io"
 	"log"
 
 	"golang.org/x/net/context"
@@ -31,9 +32,28 @@ func main() {
 	response, err := c.GetOrder(context.Background(), &req)
 
 	if err != nil {
-		log.Fatalf("Error calling SayHello: %v", err)
+		log.Fatalf("Error calling `GetOrder`: %v", err)
 	}
 
-	log.Printf("Response from server: %v", response)
+	log.Printf("Response from server for method `GetOrder`: %v\n", response)
+
+
+	stream, err := c.SearchOrders(context.Background(), &req)
+	if err != nil {
+		log.Fatalf("Error calling `SearchOrders`: %v", err)
+	}
+	count := 1
+	for {
+		
+		order, err := stream.Recv()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			log.Fatalf("Error getting server response for method `SearchOrders`: %v", err)
+		}
+		log.Printf("Response from server for method `SearchOrders`: number=%v, value= %v\n", count, order)
+		count++
+	}
 
 }

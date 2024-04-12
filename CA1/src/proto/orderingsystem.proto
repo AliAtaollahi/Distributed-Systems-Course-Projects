@@ -6,6 +6,7 @@ option go_package = "./orderingsystem";
 
 service OrderManagementService {
     rpc GetOrder(OrdersRequest) returns (OrdersResponse);
+    rpc SearchOrders(OrdersRequest) returns (stream OrderResponse);
 }
 
 message OrdersRequest {
@@ -14,5 +15,10 @@ message OrdersRequest {
 
 message OrdersResponse {
     repeated string orders = 1;
+    string timestamp = 2;
+}
+
+message OrderResponse {
+    string order_id = 1;
     string timestamp = 2;
 }
