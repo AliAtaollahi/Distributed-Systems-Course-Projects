@@ -7,6 +7,7 @@ option go_package = "./orderingsystem";
 service OrderManagementService {
     rpc GetOrder(OrdersRequest) returns (OrdersResponse);
     rpc SearchOrders(OrdersRequest) returns (stream OrderResponse);
+    rpc UpdateOrders(stream OrdersRequest) returns (OrdersResponse);
 }
 
 message OrdersRequest {

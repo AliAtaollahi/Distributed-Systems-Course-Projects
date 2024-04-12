@@ -24,9 +24,9 @@ func main() {
 	c := orderingsystem.NewOrderManagementServiceClient(conn)
 	req := orderingsystem.OrdersRequest{
 		OrdersIds: []string{
-            "apple",
+			"apple",
 			"cher",
-        },
+		},
 	}
 
 	response, err := c.GetOrder(context.Background(), &req)
@@ -37,14 +37,13 @@ func main() {
 
 	log.Printf("Response from server for method `GetOrder`: %v\n", response)
 
-
 	stream, err := c.SearchOrders(context.Background(), &req)
 	if err != nil {
 		log.Fatalf("Error calling `SearchOrders`: %v", err)
 	}
 	count := 1
 	for {
-		
+
 		order, err := stream.Recv()
 		if err == io.EOF {
 			break
@@ -55,5 +54,41 @@ func main() {
 		log.Printf("Response from server for method `SearchOrders`: number=%v, value= %v\n", count, order)
 		count++
 	}
+
+	sendStream, err := c.UpdateOrders(context.Background())
+	if err != nil {
+		log.Fatalf("Error calling `UpdateOrders`: %v", err)
+	}
+
+	updateReqs := []*orderingsystem.OrdersRequest{
+		&orderingsystem.OrdersRequest{
+			OrdersIds: []string{
+				"yellow apple",
+				"green apple",
+			},
+		},
+		&orderingsystem.OrdersRequest{
+			OrdersIds: []string{
+				"strawberry",
+			},
+		},
+		&orderingsystem.OrdersRequest{
+			OrdersIds: []string{
+				"lemon",
+				"pineapple",
+			},
+		},
+	}
+
+	for _, updateReq := range updateReqs {
+		if err := sendStream.Send(updateReq); err != nil {
+			log.Fatalf("Error happend when sending orderReq for method `UpdateOrders`: %v", err)
+		}
+	}
+	reply, err := sendStream.CloseAndRecv()
+	if err != nil {
+		log.Fatalf("Error happend when closing stream for method `UpdateOrders`: %v", err)
+	}
+	log.Printf("Response from server for method `UpdateOrders`: %v\n", reply)
 
 }
