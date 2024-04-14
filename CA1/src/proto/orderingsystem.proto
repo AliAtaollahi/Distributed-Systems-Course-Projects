@@ -12,7 +12,7 @@ service OrderManagementService {
 }
 
 message OrdersRequest {
-    repeated string orders_ids = 1;
+    repeated string orders = 1;
 }
 
 message OrdersResponse {
@@ -21,6 +21,6 @@ message OrdersResponse {
 }
 
 message OrderResponse {
-    string order_id = 1;
+    string order = 1;
     string timestamp = 2;
 }

@@ -1,22 +1,23 @@
 package main
 
 import (
-	"dist-projects/ca1/src/orderingsystem"
 	"io"
 	"log"
+
+	pb "dist-projects/ca1/src/orderingsystem"
 
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-func CreateOrderRequest(orders []string) *orderingsystem.OrdersRequest {
-	return &orderingsystem.OrdersRequest{
-		OrdersIds: orders,
+func CreateOrderRequest(orders []string) *pb.OrdersRequest {
+	return &pb.OrdersRequest{
+		Orders: orders,
 	}
 }
 
-func GetGetOrderRequest() *orderingsystem.OrdersRequest {
+func GetGetOrderRequest() *pb.OrdersRequest {
 	return CreateOrderRequest([]string{
 		"apple",
 		"cher",
@@ -24,7 +25,7 @@ func GetGetOrderRequest() *orderingsystem.OrdersRequest {
 	)
 }
 
-func GetOrderCall(client orderingsystem.OrderManagementServiceClient) {
+func GetOrderCall(client pb.OrderManagementServiceClient) {
 	log.Println("Try calling method `GetOrder`...")
 
 	req := GetGetOrderRequest()
@@ -37,11 +38,11 @@ func GetOrderCall(client orderingsystem.OrderManagementServiceClient) {
 	log.Printf("Response from server for method `GetOrder`: %v\n", response)
 }
 
-func SearchOrdersRequest() *orderingsystem.OrdersRequest {
+func SearchOrdersRequest() *pb.OrdersRequest {
 	return GetGetOrderRequest()
 }
 
-func SearchOrdersCall(client orderingsystem.OrderManagementServiceClient) {
+func SearchOrdersCall(client pb.OrderManagementServiceClient) {
 	log.Println("Try calling method `SearchOrders`...")
 
 	req := SearchOrdersRequest()
@@ -63,8 +64,8 @@ func SearchOrdersCall(client orderingsystem.OrderManagementServiceClient) {
 	}
 }
 
-func GetUpdateOrdersRequest() []*orderingsystem.OrdersRequest {
-	return []*orderingsystem.OrdersRequest{
+func GetUpdateOrdersRequest() []*pb.OrdersRequest {
+	return []*pb.OrdersRequest{
 		CreateOrderRequest([]string{
 			"yellow apple",
 			"green apple",
@@ -82,7 +83,7 @@ func GetUpdateOrdersRequest() []*orderingsystem.OrdersRequest {
 	}
 }
 
-func UpdateOrdersCall(client orderingsystem.OrderManagementServiceClient) {
+func UpdateOrdersCall(client pb.OrderManagementServiceClient) {
 	log.Println("Try calling method `UpdateOrders`...")
 
 	stream, err := client.UpdateOrders(context.Background())
@@ -104,8 +105,8 @@ func UpdateOrdersCall(client orderingsystem.OrderManagementServiceClient) {
 	log.Printf("Response from server for method `UpdateOrders`: %v\n", reply)
 }
 
-func GetProcessOrdersRequest() []*orderingsystem.OrdersRequest {
-	return []*orderingsystem.OrdersRequest{
+func GetProcessOrdersRequest() []*pb.OrdersRequest {
+	return []*pb.OrdersRequest{
 		GetGetOrderRequest(),
 		CreateOrderRequest([]string{
 			"orange",
@@ -115,7 +116,7 @@ func GetProcessOrdersRequest() []*orderingsystem.OrdersRequest {
 	}
 }
 
-func ProcessOrdersCall(client orderingsystem.OrderManagementServiceClient) {
+func ProcessOrdersCall(client pb.OrderManagementServiceClient) {
 	log.Println("Try calling method `ProcessOrders`...")
 
 	processReqs := GetProcessOrdersRequest()
@@ -161,7 +162,7 @@ func main() {
 
 	defer conn.Close()
 
-	client := orderingsystem.NewOrderManagementServiceClient(conn)
+	client := pb.NewOrderManagementServiceClient(conn)
 
 	GetOrderCall(client)
 	SearchOrdersCall(client)

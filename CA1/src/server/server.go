@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"dist-projects/ca1/src/orderingsystem"
+	pb "dist-projects/ca1/src/orderingsystem"
 
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -16,13 +16,13 @@ import (
 
 type Server struct {
 	orders []string
-	orderingsystem.UnimplementedOrderManagementServiceServer
+	pb.UnimplementedOrderManagementServiceServer
 }
 
-func (s *Server) GetOrder(ctx context.Context, request *orderingsystem.OrdersRequest) (*orderingsystem.OrdersResponse, error) {
+func (s *Server) GetOrder(ctx context.Context, request *pb.OrdersRequest) (*pb.OrdersResponse, error) {
 	log.Printf("Received message body from client for method `GetOrder`: %v", request)
 	selectedOrders := []string{}
-	for _, reqOrder := range request.OrdersIds {
+	for _, reqOrder := range request.Orders {
 		for _, order := range s.orders {
 			if strings.Contains(order, reqOrder) {
 				selectedOrders = append(selectedOrders, order)
@@ -30,16 +30,16 @@ func (s *Server) GetOrder(ctx context.Context, request *orderingsystem.OrdersReq
 		}
 	}
 	currentTime := time.Now()
-	return &orderingsystem.OrdersResponse{Orders: selectedOrders, Timestamp: strconv.FormatInt(currentTime.UnixNano(), 10)}, nil
+	return &pb.OrdersResponse{Orders: selectedOrders, Timestamp: strconv.FormatInt(currentTime.UnixNano(), 10)}, nil
 }
 
-func (s *Server) SearchOrders(request *orderingsystem.OrdersRequest, stream orderingsystem.OrderManagementService_SearchOrdersServer) error {
+func (s *Server) SearchOrders(request *pb.OrdersRequest, stream pb.OrderManagementService_SearchOrdersServer) error {
 	log.Printf("Received message body from client for method `SearchOrders`: %v", request)
-	for _, reqOrder := range request.OrdersIds {
+	for _, reqOrder := range request.Orders {
 		for _, order := range s.orders {
 			if strings.Contains(order, reqOrder) {
 				currentTime := time.Now()
-				if err := stream.Send(&orderingsystem.OrderResponse{OrderId: order, Timestamp: strconv.FormatInt(currentTime.UnixNano(), 10)}); err != nil {
+				if err := stream.Send(&pb.OrderResponse{Order: order, Timestamp: strconv.FormatInt(currentTime.UnixNano(), 10)}); err != nil {
 					log.Fatalf("Error happend when sending order for method `SearchOrders`: %v", err)
 					return err
 				}
@@ -50,7 +50,7 @@ func (s *Server) SearchOrders(request *orderingsystem.OrdersRequest, stream orde
 	return nil
 }
 
-func (s *Server) UpdateOrders(stream orderingsystem.OrderManagementService_UpdateOrdersServer) error {
+func (s *Server) UpdateOrders(stream pb.OrderManagementService_UpdateOrdersServer) error {
 	receivedOrders := []string{}
 	count := 0
 	for {
@@ -60,13 +60,13 @@ func (s *Server) UpdateOrders(stream orderingsystem.OrderManagementService_Updat
 		if err == io.EOF {
 			currentTime := time.Now()
 			log.Printf("Updated Orders: %v\n", s.orders)
-			return stream.SendAndClose(&orderingsystem.OrdersResponse{Orders: receivedOrders, Timestamp: strconv.FormatInt(currentTime.UnixNano(), 10)})
+			return stream.SendAndClose(&pb.OrdersResponse{Orders: receivedOrders, Timestamp: strconv.FormatInt(currentTime.UnixNano(), 10)})
 		}
 		if err != nil {
 			log.Fatalf("Error happend when receiving orderId for method `UpdateOrders`: %v", err)
 			return err
 		}
-		for _, newOrder := range orderIds.OrdersIds {
+		for _, newOrder := range orderIds.Orders {
 			add := true
 			for _, order := range s.orders {
 				if newOrder == order {
@@ -82,7 +82,7 @@ func (s *Server) UpdateOrders(stream orderingsystem.OrderManagementService_Updat
 	}
 }
 
-func (s *Server) ProcessOrders(stream orderingsystem.OrderManagementService_ProcessOrdersServer) error {
+func (s *Server) ProcessOrders(stream pb.OrderManagementService_ProcessOrdersServer) error {
 	count := 0
 	for {
 		request, err := stream.Recv()
@@ -95,11 +95,11 @@ func (s *Server) ProcessOrders(stream orderingsystem.OrderManagementService_Proc
 			return err
 		}
 
-		for _, reqOrder := range request.OrdersIds {
+		for _, reqOrder := range request.Orders {
 			for _, order := range s.orders {
 				if strings.Contains(order, reqOrder) {
 					currentTime := time.Now()
-					if err := stream.Send(&orderingsystem.OrderResponse{OrderId: order, Timestamp: strconv.FormatInt(currentTime.UnixNano(), 10)}); err != nil {
+					if err := stream.Send(&pb.OrderResponse{Order: order, Timestamp: strconv.FormatInt(currentTime.UnixNano(), 10)}); err != nil {
 						log.Fatalf("Error happend when sending order for method `ProcessOrders`: %v", err)
 						return err
 					}
@@ -134,7 +134,7 @@ func main() {
 
 	grpcServer := grpc.NewServer()
 
-	orderingsystem.RegisterOrderManagementServiceServer(grpcServer, &s)
+	pb.RegisterOrderManagementServiceServer(grpcServer, &s)
 	log.Println("Server successfully started...")
 
 	if err := grpcServer.Serve(lis); err != nil {
