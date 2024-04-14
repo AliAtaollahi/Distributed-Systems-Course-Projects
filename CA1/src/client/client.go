@@ -91,4 +91,46 @@ func main() {
 	}
 	log.Printf("Response from server for method `UpdateOrders`: %v\n", reply)
 
+	processReqs := []*orderingsystem.OrdersRequest{
+		&orderingsystem.OrdersRequest{
+			OrdersIds: []string{
+				"apple",
+				"cher",
+			},
+		},
+		&orderingsystem.OrdersRequest{
+			OrdersIds: []string{
+				"orange",
+				"nana",
+			},
+		},
+	}
+
+	processstream, err := c.ProcessOrders(context.Background())
+	if err != nil {
+		log.Fatalf("Error calling `ProcessOrders`: %v", err)
+	}
+	waitc := make(chan struct{})
+	go func() {
+		count := 1
+		for {
+			res, err := processstream.Recv()
+			if err == io.EOF {
+				close(waitc)
+				return
+			}
+			if err != nil {
+				log.Fatalf("Error getting server response for method `ProcessOrders`: %v", err)
+			}
+			log.Printf("Response from server for method `ProcessOrders`: number=%v, value= %v\n", count, res)
+		}
+	}()
+	for _, processReq := range processReqs {
+		if err := processstream.Send(processReq); err != nil {
+			log.Fatalf("Error happend when sending orderReq for method `ProcessOrders`: %v", err)
+		}
+	}
+	processstream.CloseSend()
+	<-waitc
+
 }

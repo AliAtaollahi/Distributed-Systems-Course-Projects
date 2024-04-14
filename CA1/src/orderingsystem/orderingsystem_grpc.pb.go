@@ -25,6 +25,7 @@ type OrderManagementServiceClient interface {
 	GetOrder(ctx context.Context, in *OrdersRequest, opts ...grpc.CallOption) (*OrdersResponse, error)
 	SearchOrders(ctx context.Context, in *OrdersRequest, opts ...grpc.CallOption) (OrderManagementService_SearchOrdersClient, error)
 	UpdateOrders(ctx context.Context, opts ...grpc.CallOption) (OrderManagementService_UpdateOrdersClient, error)
+	ProcessOrders(ctx context.Context, opts ...grpc.CallOption) (OrderManagementService_ProcessOrdersClient, error)
 }
 
 type orderManagementServiceClient struct {
@@ -110,6 +111,37 @@ func (x *orderManagementServiceUpdateOrdersClient) CloseAndRecv() (*OrdersRespon
 	return m, nil
 }
 
+func (c *orderManagementServiceClient) ProcessOrders(ctx context.Context, opts ...grpc.CallOption) (OrderManagementService_ProcessOrdersClient, error) {
+	stream, err := c.cc.NewStream(ctx, &OrderManagementService_ServiceDesc.Streams[2], "/orderingsystem.OrderManagementService/ProcessOrders", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &orderManagementServiceProcessOrdersClient{stream}
+	return x, nil
+}
+
+type OrderManagementService_ProcessOrdersClient interface {
+	Send(*OrdersRequest) error
+	Recv() (*OrderResponse, error)
+	grpc.ClientStream
+}
+
+type orderManagementServiceProcessOrdersClient struct {
+	grpc.ClientStream
+}
+
+func (x *orderManagementServiceProcessOrdersClient) Send(m *OrdersRequest) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *orderManagementServiceProcessOrdersClient) Recv() (*OrderResponse, error) {
+	m := new(OrderResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // OrderManagementServiceServer is the server API for OrderManagementService service.
 // All implementations must embed UnimplementedOrderManagementServiceServer
 // for forward compatibility
@@ -117,6 +149,7 @@ type OrderManagementServiceServer interface {
 	GetOrder(context.Context, *OrdersRequest) (*OrdersResponse, error)
 	SearchOrders(*OrdersRequest, OrderManagementService_SearchOrdersServer) error
 	UpdateOrders(OrderManagementService_UpdateOrdersServer) error
+	ProcessOrders(OrderManagementService_ProcessOrdersServer) error
 	mustEmbedUnimplementedOrderManagementServiceServer()
 }
 
@@ -132,6 +165,9 @@ func (UnimplementedOrderManagementServiceServer) SearchOrders(*OrdersRequest, Or
 }
 func (UnimplementedOrderManagementServiceServer) UpdateOrders(OrderManagementService_UpdateOrdersServer) error {
 	return status.Errorf(codes.Unimplemented, "method UpdateOrders not implemented")
+}
+func (UnimplementedOrderManagementServiceServer) ProcessOrders(OrderManagementService_ProcessOrdersServer) error {
+	return status.Errorf(codes.Unimplemented, "method ProcessOrders not implemented")
 }
 func (UnimplementedOrderManagementServiceServer) mustEmbedUnimplementedOrderManagementServiceServer() {
 }
@@ -212,6 +248,32 @@ func (x *orderManagementServiceUpdateOrdersServer) Recv() (*OrdersRequest, error
 	return m, nil
 }
 
+func _OrderManagementService_ProcessOrders_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(OrderManagementServiceServer).ProcessOrders(&orderManagementServiceProcessOrdersServer{stream})
+}
+
+type OrderManagementService_ProcessOrdersServer interface {
+	Send(*OrderResponse) error
+	Recv() (*OrdersRequest, error)
+	grpc.ServerStream
+}
+
+type orderManagementServiceProcessOrdersServer struct {
+	grpc.ServerStream
+}
+
+func (x *orderManagementServiceProcessOrdersServer) Send(m *OrderResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *orderManagementServiceProcessOrdersServer) Recv() (*OrdersRequest, error) {
+	m := new(OrdersRequest)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // OrderManagementService_ServiceDesc is the grpc.ServiceDesc for OrderManagementService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -233,6 +295,12 @@ var OrderManagementService_ServiceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "UpdateOrders",
 			Handler:       _OrderManagementService_UpdateOrders_Handler,
+			ClientStreams: true,
+		},
+		{
+			StreamName:    "ProcessOrders",
+			Handler:       _OrderManagementService_ProcessOrders_Handler,
+			ServerStreams: true,
 			ClientStreams: true,
 		},
 	},

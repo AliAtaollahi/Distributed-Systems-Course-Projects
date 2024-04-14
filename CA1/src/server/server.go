@@ -82,6 +82,33 @@ func (s *Server) UpdateOrders(stream orderingsystem.OrderManagementService_Updat
 	}
 }
 
+func (s *Server) ProcessOrders(stream orderingsystem.OrderManagementService_ProcessOrdersServer) error {
+	count := 0
+	for {
+		request, err := stream.Recv()
+		log.Printf("Received message body from client for method `ProcessOrders`: number=%v, value= %v\n", count, request)
+		if err == io.EOF {
+			return nil
+		}
+		if err != nil {
+			log.Fatalf("Error happend when receiving orderId for method `ProcessOrders`: %v", err)
+			return err
+		}
+
+		for _, reqOrder := range request.OrdersIds {
+			for _, order := range s.orders {
+				if strings.Contains(order, reqOrder) {
+					currentTime := time.Now()
+					if err := stream.Send(&orderingsystem.OrderResponse{OrderId: order, Timestamp: strconv.FormatInt(currentTime.UnixNano(), 10)}); err != nil {
+						log.Fatalf("Error happend when sending order for method `ProcessOrders`: %v", err)
+						return err
+					}
+				}
+			}
+		}
+	}
+}
+
 func main() {
 	lis, err := net.Listen("tcp", ":9000")
 

@@ -8,6 +8,7 @@ service OrderManagementService {
     rpc GetOrder(OrdersRequest) returns (OrdersResponse);
     rpc SearchOrders(OrdersRequest) returns (stream OrderResponse);
     rpc UpdateOrders(stream OrdersRequest) returns (OrdersResponse);
+    rpc ProcessOrders(stream OrdersRequest) returns (stream OrderResponse);
 }
 
 message OrdersRequest {
