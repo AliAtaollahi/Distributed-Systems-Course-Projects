@@ -10,40 +10,47 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-func main() {
-	var conn *grpc.ClientConn
-
-	conn, err := grpc.Dial(":9000", grpc.WithTransportCredentials(insecure.NewCredentials()))
-
-	if err != nil {
-		log.Fatalf("Could not connect to 9000: %v", err)
+func CreateOrderRequest(orders []string) *orderingsystem.OrdersRequest {
+	return &orderingsystem.OrdersRequest{
+		OrdersIds: orders,
 	}
+}
 
-	defer conn.Close()
+func GetGetOrderRequest() *orderingsystem.OrdersRequest {
+	return CreateOrderRequest([]string{
+		"apple",
+		"cher",
+	},
+	)
+}
 
-	c := orderingsystem.NewOrderManagementServiceClient(conn)
-	req := orderingsystem.OrdersRequest{
-		OrdersIds: []string{
-			"apple",
-			"cher",
-		},
-	}
+func GetOrderCall(client orderingsystem.OrderManagementServiceClient) {
+	log.Println("Try calling method `GetOrder`...")
 
-	response, err := c.GetOrder(context.Background(), &req)
+	req := GetGetOrderRequest()
+	response, err := client.GetOrder(context.Background(), req)
 
 	if err != nil {
 		log.Fatalf("Error calling `GetOrder`: %v", err)
 	}
 
 	log.Printf("Response from server for method `GetOrder`: %v\n", response)
+}
 
-	stream, err := c.SearchOrders(context.Background(), &req)
+func SearchOrdersRequest() *orderingsystem.OrdersRequest {
+	return GetGetOrderRequest()
+}
+
+func SearchOrdersCall(client orderingsystem.OrderManagementServiceClient) {
+	log.Println("Try calling method `SearchOrders`...")
+
+	req := SearchOrdersRequest()
+	stream, err := client.SearchOrders(context.Background(), req)
 	if err != nil {
 		log.Fatalf("Error calling `SearchOrders`: %v", err)
 	}
 	count := 1
 	for {
-
 		order, err := stream.Recv()
 		if err == io.EOF {
 			break
@@ -54,59 +61,65 @@ func main() {
 		log.Printf("Response from server for method `SearchOrders`: number=%v, value= %v\n", count, order)
 		count++
 	}
+}
 
-	sendStream, err := c.UpdateOrders(context.Background())
+func GetUpdateOrdersRequest() []*orderingsystem.OrdersRequest {
+	return []*orderingsystem.OrdersRequest{
+		CreateOrderRequest([]string{
+			"yellow apple",
+			"green apple",
+		},
+		),
+		CreateOrderRequest([]string{
+			"strawberry",
+		},
+		),
+		CreateOrderRequest([]string{
+			"lemon",
+			"pineapple",
+		},
+		),
+	}
+}
+
+func UpdateOrdersCall(client orderingsystem.OrderManagementServiceClient) {
+	log.Println("Try calling method `UpdateOrders`...")
+
+	stream, err := client.UpdateOrders(context.Background())
 	if err != nil {
 		log.Fatalf("Error calling `UpdateOrders`: %v", err)
 	}
 
-	updateReqs := []*orderingsystem.OrdersRequest{
-		&orderingsystem.OrdersRequest{
-			OrdersIds: []string{
-				"yellow apple",
-				"green apple",
-			},
-		},
-		&orderingsystem.OrdersRequest{
-			OrdersIds: []string{
-				"strawberry",
-			},
-		},
-		&orderingsystem.OrdersRequest{
-			OrdersIds: []string{
-				"lemon",
-				"pineapple",
-			},
-		},
-	}
+	updateReqs := GetUpdateOrdersRequest()
 
 	for _, updateReq := range updateReqs {
-		if err := sendStream.Send(updateReq); err != nil {
+		if err := stream.Send(updateReq); err != nil {
 			log.Fatalf("Error happend when sending orderReq for method `UpdateOrders`: %v", err)
 		}
 	}
-	reply, err := sendStream.CloseAndRecv()
+	reply, err := stream.CloseAndRecv()
 	if err != nil {
 		log.Fatalf("Error happend when closing stream for method `UpdateOrders`: %v", err)
 	}
 	log.Printf("Response from server for method `UpdateOrders`: %v\n", reply)
+}
 
-	processReqs := []*orderingsystem.OrdersRequest{
-		&orderingsystem.OrdersRequest{
-			OrdersIds: []string{
-				"apple",
-				"cher",
-			},
+func GetProcessOrdersRequest() []*orderingsystem.OrdersRequest {
+	return []*orderingsystem.OrdersRequest{
+		GetGetOrderRequest(),
+		CreateOrderRequest([]string{
+			"orange",
+			"nana",
 		},
-		&orderingsystem.OrdersRequest{
-			OrdersIds: []string{
-				"orange",
-				"nana",
-			},
-		},
+		),
 	}
+}
 
-	processstream, err := c.ProcessOrders(context.Background())
+func ProcessOrdersCall(client orderingsystem.OrderManagementServiceClient) {
+	log.Println("Try calling method `ProcessOrders`...")
+
+	processReqs := GetProcessOrdersRequest()
+	stream, err := client.ProcessOrders(context.Background())
 	if err != nil {
 		log.Fatalf("Error calling `ProcessOrders`: %v", err)
 	}
@@ -114,7 +127,7 @@ func main() {
 	go func() {
 		count := 1
 		for {
-			res, err := processstream.Recv()
+			res, err := stream.Recv()
 			if err == io.EOF {
 				close(waitc)
 				return
@@ -123,14 +136,35 @@ func main() {
 				log.Fatalf("Error getting server response for method `ProcessOrders`: %v", err)
 			}
 			log.Printf("Response from server for method `ProcessOrders`: number=%v, value= %v\n", count, res)
+			count++
 		}
 	}()
 	for _, processReq := range processReqs {
-		if err := processstream.Send(processReq); err != nil {
+		if err := stream.Send(processReq); err != nil {
 			log.Fatalf("Error happend when sending orderReq for method `ProcessOrders`: %v", err)
 		}
 	}
-	processstream.CloseSend()
+	stream.CloseSend()
 	<-waitc
+}
 
+func main() {
+	var conn *grpc.ClientConn
+
+	conn, err := grpc.Dial("localhost:9000", grpc.WithTransportCredentials(insecure.NewCredentials()))
+
+	if err != nil {
+		log.Fatalf("Could not connect to 9000: %v", err)
+	}
+
+	log.Print("Successfully connected to server!")
+
+	defer conn.Close()
+
+	client := orderingsystem.NewOrderManagementServiceClient(conn)
+
+	GetOrderCall(client)
+	SearchOrdersCall(client)
+	UpdateOrdersCall(client)
+	ProcessOrdersCall(client)
 }

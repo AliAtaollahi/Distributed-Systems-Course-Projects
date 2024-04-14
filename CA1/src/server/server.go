@@ -110,7 +110,7 @@ func (s *Server) ProcessOrders(stream orderingsystem.OrderManagementService_Proc
 }
 
 func main() {
-	lis, err := net.Listen("tcp", ":9000")
+	lis, err := net.Listen("tcp", "localhost:9000")
 
 	if err != nil {
 		log.Fatalf("Failed to listen on port 9000: %v", err)
@@ -135,6 +135,7 @@ func main() {
 	grpcServer := grpc.NewServer()
 
 	orderingsystem.RegisterOrderManagementServiceServer(grpcServer, &s)
+	log.Println("Server successfully started...")
 
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("Failed to start grpc server: %v", err)
