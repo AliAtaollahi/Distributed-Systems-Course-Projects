@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package orderingsystem;
+
+option go_package = "./orderingsystem";
+
+service OrderManagementService {
+    rpc GetOrder(OrdersRequest) returns (OrdersResponse);
+    rpc SearchOrders(OrdersRequest) returns (stream OrderResponse);
+    rpc UpdateOrders(stream OrdersRequest) returns (OrdersResponse);
+    rpc ProcessOrders(stream OrdersRequest) returns (stream OrderResponse);
+}
+
+message OrdersRequest {
+    repeated string orders = 1;
+}
+
+message OrdersResponse {
+    repeated string orders = 1;
+    string timestamp = 2;
+}
+
+message OrderResponse {
+    string order = 1;
+    string timestamp = 2;
+}
