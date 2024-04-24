@@ -11,7 +11,7 @@ import (
 
 func ticketBuyer(id int, cliChannel chan string, orderChannel chan string) {
 	logFileName := fmt.Sprintf("./log/logTicketBuyer-%d.txt", id)
-	file, err := os.OpenFile(logFileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	file, err := os.OpenFile(logFileName, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -38,9 +38,19 @@ func ticketBuyer(id int, cliChannel chan string, orderChannel chan string) {
 
 }
 
-func ticketSeller(orderChannel chan string) {
+func loadBalancer(orderChannel chan string) {
+	logFileName := fmt.Sprintf("./log/seller.txt")
+	// write from beging and create from begining if exists too 
+	file, err := os.OpenFile(logFileName, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+	logger := log.New(file, fmt.Sprintf("seller >> "), log.LstdFlags)
+
 	for order := range orderChannel {
 		fmt.Println("Ticket sold: ", order)
+		logger.Println("Ticket sold: ", order)
 	}
 }
 
@@ -57,12 +67,12 @@ func main() {
 	for i := 0; i < ticketBuyersNumber; i++ {
 		go ticketBuyer(i, cliChannels[i], orderChannel)
 	}
-	go ticketSeller(orderChannel)
+	go loadBalancer(orderChannel)
 
 	reader := bufio.NewReader(os.Stdin)
 
 	// logger
-	file, err := os.OpenFile("./log/cli.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	file, err := os.OpenFile("./log/cli.txt", os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
