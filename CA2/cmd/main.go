@@ -4,9 +4,12 @@ import (
 	"bufio"
 	"fmt"
 	"log"
-	"math/rand"
+
+	// "math/rand"
 	"os"
-	"time"
+	"strconv"
+	"strings"
+	// "time"
 )
 
 func ticketBuyer(id int, cliChannel chan string, orderChannel chan string) {
@@ -28,30 +31,40 @@ func ticketBuyer(id int, cliChannel chan string, orderChannel chan string) {
 	}()
 
 	for {
-		sleepTime := rand.Intn(5) + 1
-		time.Sleep(time.Duration(sleepTime) * time.Second)
-		orderChannel <- fmt.Sprintf("Buyer %d - order : %s", id, "order")
-		// write to logger
-		logger.Println("ticket requested")
-		fmt.Println("Buyer ", id, " ticket requested")
 	}
+
+	// for {
+	// 	sleepTime := rand.Intn(5) + 1
+	// 	time.Sleep(time.Duration(sleepTime) * time.Second)
+	// 	orderChannel <- fmt.Sprintf("Buyer %d - order : %s", id, "order")
+	// 	// write to logger
+	// 	logger.Println("ticket requested")
+	// 	fmt.Println("Buyer ", id, " ticket requested")
+	// }
 
 }
 
 func loadBalancer(orderChannel chan string) {
-	logFileName := fmt.Sprintf("./log/seller.txt")
-	// write from beging and create from begining if exists too 
+	// write from beging and create from begining if exists too
+	logFileName := fmt.Sprintf("./log/loadBalancer.txt")
 	file, err := os.OpenFile(logFileName, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer file.Close()
-	logger := log.New(file, fmt.Sprintf("seller >> "), log.LstdFlags)
+	logger := log.New(file, fmt.Sprintf("loadBalancer >> "), log.LstdFlags)
 
 	for order := range orderChannel {
 		fmt.Println("Ticket sold: ", order)
 		logger.Println("Ticket sold: ", order)
 	}
+}
+
+func printManual() {
+	command1 := "<buyerID> buy <eventID> <numberOfTickets>"
+	command2 := "<buyerID> events info"
+
+	fmt.Printf("Help : \n %s \n %s \n", command1, command2)
 }
 
 func main() {
@@ -83,7 +96,13 @@ func main() {
 		fmt.Print("Enter text: ")
 		text, _ := reader.ReadString('\n')
 		fmt.Println("You entered:", text)
-		cliChannels[1] <- text
+		// buyerID := strings.Split(text, " ")
+		buyerID, err := strconv.Atoi(strings.Split(text, " ")[0])
+		if err != nil {
+			printManual()
+			continue
+		}
+		cliChannels[buyerID] <- text
 		logger.Println(text)
 	}
 }

@@ -1,8 +1,2 @@
-seller >> 2024/04/18 22:03:56 Ticket sold:  Buyer 2 - order : order
-seller >> 2024/04/18 22:03:57 Ticket sold:  Buyer 1 - order : order
-seller >> 2024/04/18 22:03:58 Ticket sold:  Buyer 0 - order : order
-seller >> 2024/04/18 22:03:58 Ticket sold:  Buyer 1 - order : order
-seller >> 2024/04/18 22:03:59 Ticket sold:  Buyer 3 - order : order
-seller >> 2024/04/18 22:03:59 Ticket sold:  Buyer 2 - order : order
-seller >> 2024/04/18 22:04:00 Ticket sold:  Buyer 1 - order : order
-seller >> 2024/04/18 22:04:01 Ticket sold:  Buyer 1 - order : order
+seller >> 2024/04/28 13:19:53 Ticket sold:  Buyer 1 - order : 1 hhh
+
