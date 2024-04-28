@@ -1,6 +1,8 @@
 package main
 
-import "time"
+import (
+	"time"
+)
 
 type Ticket struct {
 	Id      string
@@ -13,4 +15,14 @@ type Event struct {
 	Date             time.Time
 	TotalTickets    int
 	AvailableTickets int
+}
+
+type TicketRequest struct {
+	NumberOfTickets int
+	EventId int
+	UserId  int
+}
+
+type EventInfoRequest struct {
+	UserId int
 }

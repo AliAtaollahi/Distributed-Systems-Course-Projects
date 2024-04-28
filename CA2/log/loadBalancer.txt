@@ -1,0 +1,14 @@
+loadBalancer >> 2024/04/28 18:07:59 ticket requested by  2
+loadBalancer >> 2024/04/28 18:08:42 ticket requested by  3
+loadBalancer >> 2024/04/28 18:08:53 resend  3  to channel
+loadBalancer >> 2024/04/28 18:08:53 ticket requested by  3
+loadBalancer >> 2024/04/28 18:10:03 resend  3  to channel
+loadBalancer >> 2024/04/28 18:10:03 ticket requested by  3
+loadBalancer >> 2024/04/28 18:10:11 ticket requested by  2
+loadBalancer >> 2024/04/28 18:10:18 resend  2  to channel
+loadBalancer >> 2024/04/28 18:10:18 ticket requested by  2
+loadBalancer >> 2024/04/28 18:10:26 resend  2  to channel
+loadBalancer >> 2024/04/28 18:11:06 event info requested by  3
+loadBalancer >> 2024/04/28 18:11:27 event info requested by  1
+loadBalancer >> 2024/04/28 18:11:37 resend  1  to channel
+loadBalancer >> 2024/04/28 18:11:37 event info requested by  1
