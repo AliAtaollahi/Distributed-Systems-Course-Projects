@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"log"
 
-	// "math/rand"
+	"math/rand"
 	"os"
 	"strconv"
 	"strings"
-	// "time"
+	"time"
 )
 
 func ticketBuyer(id int, cliChannel chan string, orderChannel chan string) {
@@ -30,22 +30,24 @@ func ticketBuyer(id int, cliChannel chan string, orderChannel chan string) {
 		}
 	}()
 
-	for {
-	}
-
 	// for {
-	// 	sleepTime := rand.Intn(5) + 1
-	// 	time.Sleep(time.Duration(sleepTime) * time.Second)
-	// 	orderChannel <- fmt.Sprintf("Buyer %d - order : %s", id, "order")
-	// 	// write to logger
-	// 	logger.Println("ticket requested")
-	// 	fmt.Println("Buyer ", id, " ticket requested")
 	// }
+
+	// automatic load generator use if you want
+	for {
+		sleepTime := rand.Intn(5) + 1
+		time.Sleep(time.Duration(sleepTime) * time.Second)
+		orderChannel <- fmt.Sprintf("%d buy 1 %d", id, sleepTime)
+		// write to logger
+		logger.Println("ticket requested")
+		fmt.Println("Buyer ", id, " ticket requested")
+	}
 
 }
 
 func loadBalancer(orderChannel chan string) {
-	// write from beging and create from begining if exists too
+
+	// logger
 	logFileName := fmt.Sprintf("./log/loadBalancer.txt")
 	file, err := os.OpenFile(logFileName, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 	if err != nil {
@@ -54,10 +56,43 @@ func loadBalancer(orderChannel chan string) {
 	defer file.Close()
 	logger := log.New(file, fmt.Sprintf("loadBalancer >> "), log.LstdFlags)
 
+	eventInfoChannel := make(chan string, 10)
+	eventTicketChannel := make(chan string, 10)
+
+	ts := TicketServices{}
+
+	go eventInfoHandler(&ts, eventInfoChannel)
+	go eventTicketHandler(&ts, eventTicketChannel)
+
+	previousBuyerID := -1
+	resend := false
+
 	for order := range orderChannel {
-		fmt.Println("Ticket sold: ", order)
-		logger.Println("Ticket sold: ", order)
+		// fmt.Println("Ticket sold: ", order)
+		// logger.Println("Ticket sold: ", order)
+		buyerID, _ := strconv.Atoi(strings.Split(order, " ")[0])
+
+		if buyerID == previousBuyerID && resend == false {
+			// resend it to chanel
+			logger.Println("resend ", buyerID, " to channel")
+			resend = true
+			orderChannel <- order
+			continue
+		}
+
+		resend = false
+		previousBuyerID = buyerID
+
+		// send it to event list shower or event ticket buyer
 	}
+}
+
+func eventInfoHandler(ts *TicketServices, inputChannel chan string) {
+
+}
+
+func eventTicketHandler(ts *TicketServices, inputChannel chan string) {
+
 }
 
 func printManual() {
