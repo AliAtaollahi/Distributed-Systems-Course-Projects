@@ -115,8 +115,7 @@ func eventInfoHandler(ts *TicketServices, inputChannel chan EventInfoRequest, ou
 	logger := log.New(file, "eventInfoHandler >> ", log.LstdFlags)
 
 	for infoReq := range inputChannel {
-		ts.showEvents(infoReq)
-		message := fmt.Sprintf("handler: event info requested by %d \n", infoReq.UserId)
+		message := ts.showEvents(infoReq)
 		outputChannels[infoReq.UserId] <- message
 		logger.Printf(message)
 	}
@@ -131,8 +130,7 @@ func eventTicketHandler(ts *TicketServices, inputChannel chan TicketRequest, out
 	logger := log.New(file, "eventTicketHandler >> ", log.LstdFlags)
 
 	for ticketReq := range inputChannel {
-		ts.buyTicket(ticketReq)
-		message := fmt.Sprintf("handler: ticket requested by %d \n", ticketReq.UserId)
+		message := ts.buyTicket(ticketReq)
 		outputChannels[ticketReq.UserId] <- message
 		logger.Printf(message)
 	}
