@@ -1,6 +1,8 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // "fmt"
 // "log"
@@ -13,6 +15,7 @@ type TicketServices struct {
 func (ts *TicketServices) showEvents(req EventInfoRequest) string {
 
 	// lock it
+	// sync.Map
 	// for in cash
 	// log it
 	message := fmt.Sprintf("handler: event info requested by %d \n", req.UserId)

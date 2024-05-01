@@ -4,83 +4,47 @@ import (
 	"bufio"
 	"fmt"
 	"log"
-<<<<<<< HEAD
-	"math/rand"
-	"os"
-	"time"
-=======
 
 	"os"
 	"strconv"
 	"strings"
 
-	// "math/rand"
-	// "time"
->>>>>>> CA2
+	"math/rand"
+	"time"
 )
 
 func ticketBuyer(id int, cliChannel chan string, orderChannel chan string) {
 	logFileName := fmt.Sprintf("./log/logTicketBuyer-%d.txt", id)
-<<<<<<< HEAD
-	file, err := os.OpenFile(logFileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-=======
 	file, err := os.OpenFile(logFileName, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
->>>>>>> CA2
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer file.Close()
 	logger := log.New(file, fmt.Sprintf("%d >> ", id), log.LstdFlags)
 
-<<<<<<< HEAD
+	// // automatic load generator use if you want
 	go func() {
-		for order := range cliChannel {
-			orderChannel <- fmt.Sprintf("Buyer %d - order : %s", id, order)
+		for {
+			sleepTime := rand.Intn(5) + 1
+			time.Sleep(time.Duration(sleepTime) * time.Second)
+			orderChannel <- fmt.Sprintf("%d buy 1 %d", id, sleepTime)
 			// write to logger
-			logger.Println("ticket requested from input")
-			fmt.Println("Buyer ", id, " ticket requested from input")
+			logger.Println("automatic ticket requested")
+			fmt.Println("Buyer ", id, " automatic ticket requested")
 		}
 	}()
 
-	for {
-		sleepTime := rand.Intn(5) + 1
-		time.Sleep(time.Duration(sleepTime) * time.Second)
-		orderChannel <- fmt.Sprintf("Buyer %d - order : %s", id, "order")
-		// write to logger
-		logger.Println("ticket requested")
-		fmt.Println("Buyer ", id, " ticket requested")
-	}
-
-}
-
-func ticketSeller(orderChannel chan string) {
-	for order := range orderChannel {
-		fmt.Println("Ticket sold: ", order)
-	}
-=======
 	// // automatic load generator use if you want
-	// go func() {
-	// 	for {
-	// 		sleepTime := rand.Intn(5) + 1
-	// 		time.Sleep(time.Duration(sleepTime) * time.Second)
-	// 		orderChannel <- fmt.Sprintf("%d buy 1 %d", id, sleepTime)
-	// 		// write to logger
-	// 		logger.Println("automatic ticket requested")
-	// 		fmt.Println("Buyer ", id, " automatic ticket requested")
-	// 	}
-	// }()
-
-	// // automatic load generator use if you want
-	// go func() {
-	// 	for {
-	// 		sleepTime := rand.Intn(5) + 1
-	// 		time.Sleep(time.Duration(sleepTime) * time.Second)
-	// 		orderChannel <- fmt.Sprintf("%d events info", id)
-	// 		// write to logger
-	// 		logger.Println("automatic event info requested")
-	// 		fmt.Println("Buyer ", id, " automatic event info requested")
-	// 	}
-	// }()
+	go func() {
+		for {
+			sleepTime := rand.Intn(5) + 1
+			time.Sleep(time.Duration(sleepTime) * time.Second)
+			orderChannel <- fmt.Sprintf("%d events info", id)
+			// write to logger
+			logger.Println("automatic event info requested")
+			fmt.Println("Buyer ", id, " automatic event info requested")
+		}
+	}()
 
 	for input := range cliChannel {
 		_, err := strconv.Atoi(strings.Split(input, " ")[0])
@@ -176,41 +140,25 @@ func printManual() {
 	command1 := "<buyerID> buy <eventID> <numberOfTickets>"
 	command2 := "<buyerID> events info"
 	fmt.Printf("Help : \n %s \n %s \n", command1, command2)
->>>>>>> CA2
 }
 
 func main() {
 
 	ticketBuyersNumber := 4
 
-<<<<<<< HEAD
-=======
 	// all channels
->>>>>>> CA2
 	cliChannels := make([]chan string, ticketBuyersNumber)
 	for i := 0; i < ticketBuyersNumber; i++ {
-		cliChannels[i] = make(chan string)
+		cliChannels[i] = make(chan string, 3)
 	}
-<<<<<<< HEAD
 	orderChannel := make(chan string, 10)
-=======
-	orderChannel := make(chan string)
 
-	eventInfoChannel := make(chan EventInfoRequest)
-	eventTicketChannel := make(chan TicketRequest)
->>>>>>> CA2
+	eventInfoChannel := make(chan EventInfoRequest, 3)
+	eventTicketChannel := make(chan TicketRequest, 3)
 
 	for i := 0; i < ticketBuyersNumber; i++ {
 		go ticketBuyer(i, cliChannels[i], orderChannel)
 	}
-<<<<<<< HEAD
-	go ticketSeller(orderChannel)
-
-	reader := bufio.NewReader(os.Stdin)
-
-	// logger
-	file, err := os.OpenFile("./log/cli.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-=======
 	go loadBalancer(orderChannel, eventInfoChannel, eventTicketChannel)
 
 	ts := TicketServices{}
@@ -219,20 +167,12 @@ func main() {
 
 	// logger
 	file, err := os.OpenFile("./log/cli.txt", os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
->>>>>>> CA2
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer file.Close()
 	logger := log.New(file, "cli >> ", log.LstdFlags)
 
-<<<<<<< HEAD
-	for {
-		fmt.Print("Enter text: ")
-		text, _ := reader.ReadString('\n')
-		fmt.Println("You entered:", text)
-		cliChannels[1] <- text
-=======
 	reader := bufio.NewReader(os.Stdin)
 	for {
 		text, _ := reader.ReadString('\n')
@@ -242,7 +182,6 @@ func main() {
 			continue
 		}
 		cliChannels[buyerID] <- text
->>>>>>> CA2
 		logger.Println(text)
 	}
 }
