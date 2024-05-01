@@ -46,13 +46,13 @@ func ticketBuyer(id int, cliChannel chan string, orderChannel chan string) {
 	// 	}
 	// }()
 
-	for order := range cliChannel {
-		_, err := strconv.Atoi(strings.Split(order, " ")[0])
+	for input := range cliChannel {
+		_, err := strconv.Atoi(strings.Split(input, " ")[0])
 		if err != nil { // output result
-			fmt.Println(order)
+			fmt.Printf("Buyer %d output result: %s ", id, input)
 		} else {
-			orderChannel <- order
-			logger.Println("request sent to load balancer" + order)
+			orderChannel <- input
+			logger.Println("request sent to load balancer" + input)
 		}
 	}
 }
@@ -177,7 +177,6 @@ func main() {
 
 	reader := bufio.NewReader(os.Stdin)
 	for {
-		fmt.Print(" >>  ")
 		text, _ := reader.ReadString('\n')
 		buyerID, err := strconv.Atoi(strings.Split(text, " ")[0])
 		if err != nil {

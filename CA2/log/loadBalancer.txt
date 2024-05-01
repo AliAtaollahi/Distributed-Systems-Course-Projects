@@ -1,4 +1,2 @@
-loadBalancer >> 2024/05/01 05:23:18 ticket requested by  2
-loadBalancer >> 2024/05/01 05:23:27 resend  2  to channel
-loadBalancer >> 2024/05/01 05:23:35 resend  2  to channel
-loadBalancer >> 2024/05/01 05:23:35 event info requested by  2
+loadBalancer >> 2024/05/01 11:24:05 ticket requested by  3
+loadBalancer >> 2024/05/01 11:24:21 ticket requested by  2

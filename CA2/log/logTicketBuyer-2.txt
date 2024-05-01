@@ -1,6 +1,2 @@
-2 >> 2024/05/01 05:23:18 request sent to load balancer2 buy 1 1 
-
-2 >> 2024/05/01 05:23:27 request sent to load balancer2 show events
-
-2 >> 2024/05/01 05:23:35 request sent to load balancer2 events show
+2 >> 2024/05/01 11:24:21 request sent to load balancer2 buy 5 5
 
