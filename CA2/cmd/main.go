@@ -8,6 +8,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
 	// "math/rand"
 	// "time"
 )
@@ -20,7 +21,6 @@ func ticketBuyer(id int, cliChannel chan string, orderChannel chan string) {
 	}
 	defer file.Close()
 	logger := log.New(file, fmt.Sprintf("%d >> ", id), log.LstdFlags)
-
 
 	// // automatic load generator use if you want
 	// go func() {
@@ -47,8 +47,13 @@ func ticketBuyer(id int, cliChannel chan string, orderChannel chan string) {
 	// }()
 
 	for order := range cliChannel {
-		orderChannel <- order
-		logger.Println("request sent to load balancer" + order)
+		_, err := strconv.Atoi(strings.Split(order, " ")[0])
+		if err != nil { // output result
+			fmt.Println(order)
+		} else {
+			orderChannel <- order
+			logger.Println("request sent to load balancer" + order)
+		}
 	}
 }
 
@@ -101,7 +106,7 @@ func loadBalancer(orderChannel chan string, eventInfoChannel chan EventInfoReque
 	}
 }
 
-func eventInfoHandler(ts *TicketServices, inputChannel chan EventInfoRequest) {
+func eventInfoHandler(ts *TicketServices, inputChannel chan EventInfoRequest, outputChannels []chan string) {
 	file, err := os.OpenFile("./log/eventInfoHandler.txt", os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 	if err != nil {
 		log.Fatal(err)
@@ -111,11 +116,13 @@ func eventInfoHandler(ts *TicketServices, inputChannel chan EventInfoRequest) {
 
 	for infoReq := range inputChannel {
 		ts.showEvents(infoReq)
-		logger.Printf("event info requested by %d", infoReq.UserId)
+		message := fmt.Sprintf("handler: event info requested by %d \n", infoReq.UserId)
+		outputChannels[infoReq.UserId] <- message
+		logger.Printf(message)
 	}
 }
 
-func eventTicketHandler(ts *TicketServices, inputChannel chan TicketRequest) {
+func eventTicketHandler(ts *TicketServices, inputChannel chan TicketRequest, outputChannels []chan string) {
 	file, err := os.OpenFile("./log/eventTicketHandler.txt", os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 	if err != nil {
 		log.Fatal(err)
@@ -125,7 +132,9 @@ func eventTicketHandler(ts *TicketServices, inputChannel chan TicketRequest) {
 
 	for ticketReq := range inputChannel {
 		ts.buyTicket(ticketReq)
-		logger.Printf("ticket requested by %d", ticketReq.UserId)
+		message := fmt.Sprintf("handler: ticket requested by %d \n", ticketReq.UserId)
+		outputChannels[ticketReq.UserId] <- message
+		logger.Printf(message)
 	}
 }
 
@@ -139,6 +148,7 @@ func main() {
 
 	ticketBuyersNumber := 4
 
+	// all channels
 	cliChannels := make([]chan string, ticketBuyersNumber)
 	for i := 0; i < ticketBuyersNumber; i++ {
 		cliChannels[i] = make(chan string)
@@ -148,18 +158,14 @@ func main() {
 	eventInfoChannel := make(chan EventInfoRequest, 10)
 	eventTicketChannel := make(chan TicketRequest, 10)
 
-	ts := TicketServices{}
-
-	go eventInfoHandler(&ts, eventInfoChannel)
-	go eventTicketHandler(&ts, eventTicketChannel)
-
 	for i := 0; i < ticketBuyersNumber; i++ {
 		go ticketBuyer(i, cliChannels[i], orderChannel)
 	}
 	go loadBalancer(orderChannel, eventInfoChannel, eventTicketChannel)
 
-
-	reader := bufio.NewReader(os.Stdin)
+	ts := TicketServices{}
+	go eventInfoHandler(&ts, eventInfoChannel, cliChannels)
+	go eventTicketHandler(&ts, eventTicketChannel, cliChannels)
 
 	// logger
 	file, err := os.OpenFile("./log/cli.txt", os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
@@ -169,6 +175,7 @@ func main() {
 	defer file.Close()
 	logger := log.New(file, "cli >> ", log.LstdFlags)
 
+	reader := bufio.NewReader(os.Stdin)
 	for {
 		fmt.Print(" >>  ")
 		text, _ := reader.ReadString('\n')
