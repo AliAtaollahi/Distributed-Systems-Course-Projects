@@ -1,12 +1,3 @@
-loadBalancer >> 2024/05/01 14:40:33 event info requested by  2
-loadBalancer >> 2024/05/01 14:40:34 ticket requested by  1
-loadBalancer >> 2024/05/01 14:40:34 event info requested by  3
-loadBalancer >> 2024/05/01 14:40:34 ticket requested by  2
-loadBalancer >> 2024/05/01 14:40:35 resend  2  to channel
-loadBalancer >> 2024/05/01 14:40:35 event info requested by  3
-loadBalancer >> 2024/05/01 14:40:35 resend  3  to channel
-loadBalancer >> 2024/05/01 14:40:35 ticket requested by  0
-loadBalancer >> 2024/05/01 14:40:35 ticket requested by  1
-loadBalancer >> 2024/05/01 14:40:35 event info requested by  2
-loadBalancer >> 2024/05/01 14:40:35 ticket requested by  3
-loadBalancer >> 2024/05/01 14:40:35 ticket requested by  2
+loadBalancer >> 2024/05/01 19:20:06 ticket requested by  2
+loadBalancer >> 2024/05/01 19:20:36 resend  2  to channel
+loadBalancer >> 2024/05/01 19:20:36 ticket requested by  2

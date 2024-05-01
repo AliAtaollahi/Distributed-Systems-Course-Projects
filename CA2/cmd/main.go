@@ -7,9 +7,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
-
-	"math/rand"
-	"time"
+	// "math/rand"
+	// "time"
 )
 
 func ticketBuyer(id int, cliChannel chan string, orderChannel chan string) {
@@ -21,29 +20,29 @@ func ticketBuyer(id int, cliChannel chan string, orderChannel chan string) {
 	defer file.Close()
 	logger := log.New(file, fmt.Sprintf("%d >> ", id), log.LstdFlags)
 
-	// // automatic load generator use if you want
-	go func() {
-		for {
-			sleepTime := rand.Intn(5) + 1
-			time.Sleep(time.Duration(sleepTime) * time.Second)
-			orderChannel <- fmt.Sprintf("%d buy 1 %d", id, sleepTime)
-			// write to logger
-			logger.Println("automatic ticket requested")
-			fmt.Println("Buyer ", id, " automatic ticket requested")
-		}
-	}()
+	// // // automatic load generator use if you want
+	// go func() {
+	// 	for {
+	// 		sleepTime := rand.Intn(5) + 1
+	// 		time.Sleep(time.Duration(sleepTime) * time.Second)
+	// 		orderChannel <- fmt.Sprintf("%d buy 1 %d", id, sleepTime)
+	// 		// write to logger
+	// 		logger.Println("automatic ticket requested")
+	// 		fmt.Println("Buyer ", id, " automatic ticket requested")
+	// 	}
+	// }()
 
-	// // automatic load generator use if you want
-	go func() {
-		for {
-			sleepTime := rand.Intn(5) + 1
-			time.Sleep(time.Duration(sleepTime) * time.Second)
-			orderChannel <- fmt.Sprintf("%d events info", id)
-			// write to logger
-			logger.Println("automatic event info requested")
-			fmt.Println("Buyer ", id, " automatic event info requested")
-		}
-	}()
+	// // // automatic load generator use if you want
+	// go func() {
+	// 	for {
+	// 		sleepTime := rand.Intn(5) + 1
+	// 		time.Sleep(time.Duration(sleepTime) * time.Second)
+	// 		orderChannel <- fmt.Sprintf("%d events info", id)
+	// 		// write to logger
+	// 		logger.Println("automatic event info requested")
+	// 		fmt.Println("Buyer ", id, " automatic event info requested")
+	// 	}
+	// }()
 
 	for input := range cliChannel {
 		_, err := strconv.Atoi(strings.Split(input, " ")[0])

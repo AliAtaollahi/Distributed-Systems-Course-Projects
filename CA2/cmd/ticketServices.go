@@ -2,6 +2,9 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"os"
+	"sync"
 )
 
 // "fmt"
@@ -28,11 +31,15 @@ func (ts *TicketServices) InitializeCash() {
 
 func (ts *TicketServices) showEvents(req EventInfoRequest) string {
 
-	// lock it
-	// sync.Map
-	// for in cash
-	// log it
-	message := fmt.Sprintf("handler: event info requested by %d \n", req.UserId)
+	ts.lock.Lock()
+	message := ""
+
+	for i := 0; i < ts.EventCache.NumberOfEvents; i++ {
+		event, _ := ts.EventCache.Get(fmt.Sprintf("%d", i+1))
+		message += event.(Event).String()
+	}
+	ts.lock.Unlock()
+
 	return message
 }
 

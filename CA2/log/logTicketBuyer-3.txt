@@ -1,3 +1,0 @@
-3 >> 2024/05/01 14:40:34 automatic event info requested
-3 >> 2024/05/01 14:40:35 automatic event info requested
-3 >> 2024/05/01 14:40:35 automatic ticket requested
