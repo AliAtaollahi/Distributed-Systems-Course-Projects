@@ -1,2 +1,2 @@
-3 >> 2024/05/01 11:24:05 request sent to load balancer3 buy 2 2
+3 >> 2024/05/01 11:34:55 request sent to load balancer3 buy 4 4
 

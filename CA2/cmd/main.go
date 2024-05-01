@@ -151,10 +151,10 @@ func main() {
 	for i := 0; i < ticketBuyersNumber; i++ {
 		cliChannels[i] = make(chan string)
 	}
-	orderChannel := make(chan string, 10)
+	orderChannel := make(chan string)
 
-	eventInfoChannel := make(chan EventInfoRequest, 10)
-	eventTicketChannel := make(chan TicketRequest, 10)
+	eventInfoChannel := make(chan EventInfoRequest)
+	eventTicketChannel := make(chan TicketRequest)
 
 	for i := 0; i < ticketBuyersNumber; i++ {
 		go ticketBuyer(i, cliChannels[i], orderChannel)
