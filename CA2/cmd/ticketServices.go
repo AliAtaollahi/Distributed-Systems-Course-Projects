@@ -9,7 +9,21 @@ import (
 // "os"
 
 type TicketServices struct {
-	cache Cache
+	EventCache   Cache
+	lock         sync.Mutex
+	ticketLogger *log.Logger
+}
+
+func (ts *TicketServices) InitializeCash() {
+	ts.EventCache.Initialize()
+
+	logFileName := "./log/ticketLogger.txt"
+	file, err := os.OpenFile(logFileName, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
+	// defer file.Close()
+	ts.ticketLogger = log.New(file, "ticketLogger >> ", log.LstdFlags)
 }
 
 func (ts *TicketServices) showEvents(req EventInfoRequest) string {
@@ -24,19 +38,31 @@ func (ts *TicketServices) showEvents(req EventInfoRequest) string {
 
 func (ts *TicketServices) buyTicket(tr TicketRequest) string {
 
-	// logFileName := fmt.Sprintf("./log/ticketHandler.txt")
-	// file, err := os.OpenFile(logFileName, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// defer file.Close()
-	// logger := log.New(file, fmt.Sprintf("event >> "), log.LstdFlags)
-
-	// buy it
-	// log it
-	// logger.Println("ticket sb bout .....")
-	// make sure to lock when using cash part then unlock
-
-	message := fmt.Sprintf("handler: ticket requested by %d \n", tr.UserId)
+	ts.lock.Lock()
+	message := ""
+	// get event from cache
+	event, ok := ts.EventCache.Get(fmt.Sprintf("%d", tr.EventId))
+	if !ok {
+		message = fmt.Sprintf("\n event %d not found \n", tr.EventId)
+	} else {
+		// check if tickets are available
+		if event.(Event).AvailableTickets >= tr.NumberOfTickets {
+			// craete a new event with updated available tickets
+			// updatesEvent := event
+			updatesEvent := Event{
+				Id:               event.(Event).Id,
+				Name:             event.(Event).Name,
+				Date:             event.(Event).Date,
+				TotalTickets:     event.(Event).TotalTickets,
+				AvailableTickets: event.(Event).AvailableTickets - tr.NumberOfTickets,
+			}
+			ts.EventCache.Set(updatesEvent.Id, updatesEvent)
+			ts.ticketLogger.Printf("%d ticket bout for event %d buy user %d \n", tr.NumberOfTickets, tr.EventId, tr.UserId)
+			message = fmt.Sprintf("\n %d ticket bout for event %d buy user %d \n", tr.NumberOfTickets, tr.EventId, tr.UserId)
+		} else {
+			message = fmt.Sprintf("\n not enough tickets for event %d \n", tr.EventId)
+		}
+	}
+	ts.lock.Unlock()
 	return message
 }
