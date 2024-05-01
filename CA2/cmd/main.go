@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"log"
-
 	"os"
 	"strconv"
 	"strings"
@@ -91,9 +90,12 @@ func loadBalancer(orderChannel chan string, eventInfoChannel chan EventInfoReque
 		command := strings.Split(order, " ")[1]
 
 		if command == "buy" {
-			ticketBuyerID, _ := strconv.Atoi(strings.Split(order, " ")[0])
-			eventID, _ := strconv.Atoi(strings.Split(order, " ")[2])
-			numberOfTickets, _ := strconv.Atoi(strings.Split(order, " ")[3])
+			x := strings.Split(order, " ")
+			fmt.Println(x[3])
+
+			ticketBuyerID, _ := strconv.Atoi(x[0])
+			eventID, _ := strconv.Atoi(x[2])
+			numberOfTickets, _ := strconv.Atoi(x[3])
 			logger.Println("ticket requested by ", ticketBuyerID)
 			eventTicketChannel <- TicketRequest{NumberOfTickets: numberOfTickets, EventId: eventID, UserId: ticketBuyerID}
 		} else if command == "events" {
@@ -162,6 +164,7 @@ func main() {
 	go loadBalancer(orderChannel, eventInfoChannel, eventTicketChannel)
 
 	ts := TicketServices{}
+	ts.InitializeCash()
 	go eventInfoHandler(&ts, eventInfoChannel, cliChannels)
 	go eventTicketHandler(&ts, eventTicketChannel, cliChannels)
 
