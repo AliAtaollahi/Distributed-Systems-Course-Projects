@@ -38,9 +38,6 @@ func (ts *TicketServices) showEvents(req EventInfoRequest) string {
 
 func (ts *TicketServices) buyTicket(tr TicketRequest) string {
 
-	// print number of tickets
-	fmt.Printf("number of tickets %d \n", tr.NumberOfTickets)
-
 	ts.lock.Lock()
 	message := ""
 	// get event from cache

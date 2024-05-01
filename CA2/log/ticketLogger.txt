@@ -1,3 +1,0 @@
-ticketLogger >> 2024/05/01 19:01:37 25 ticket bout for event 1 buy user 2 
-ticketLogger >> 2024/05/01 19:01:57 5 ticket bout for event 1 buy user 2 
-ticketLogger >> 2024/05/01 19:02:22 0 ticket bout for event 2 buy user 2 
