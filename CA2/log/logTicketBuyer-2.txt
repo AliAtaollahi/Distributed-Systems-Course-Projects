@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 2 >> 2024/04/18 20:24:53 ticket requested
 2 >> 2024/04/18 20:24:56 ticket requested
 2 >> 2024/04/18 20:24:57 ticket requested
@@ -7,3 +8,7 @@
 2 >> 2024/04/18 20:25:10 ticket requested
 2 >> 2024/04/18 20:25:11 ticket requested
 2 >> 2024/04/18 20:25:12 ticket requested
+=======
+2 >> 2024/05/01 11:34:48 request sent to load balancer2 buy 1 1
+
+>>>>>>> CA2
