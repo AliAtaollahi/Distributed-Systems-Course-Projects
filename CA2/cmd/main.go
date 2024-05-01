@@ -48,14 +48,11 @@ func ticketBuyer(id int, cliChannel chan string, orderChannel chan string) {
 
 	for order := range cliChannel {
 		orderChannel <- order
-		// write to logger
-		logger.Println("ticket requested from input")
-		fmt.Println("Buyer ", id, " ticket requested from input")
+		logger.Println("request sent to load balancer" + order)
 	}
-
 }
 
-func loadBalancer(orderChannel chan string) {
+func loadBalancer(orderChannel chan string, eventInfoChannel chan EventInfoRequest, eventTicketChannel chan TicketRequest) {
 
 	// logger
 	logFileName := "./log/loadBalancer.txt"
@@ -65,14 +62,6 @@ func loadBalancer(orderChannel chan string) {
 	}
 	defer file.Close()
 	logger := log.New(file, "loadBalancer >> ", log.LstdFlags)
-
-	eventInfoChannel := make(chan EventInfoRequest, 10)
-	eventTicketChannel := make(chan TicketRequest, 10)
-
-	ts := TicketServices{}
-
-	go eventInfoHandler(&ts, eventInfoChannel)
-	go eventTicketHandler(&ts, eventTicketChannel)
 
 	previousBuyerID := -1
 	resend := false
@@ -156,10 +145,19 @@ func main() {
 	}
 	orderChannel := make(chan string, 10)
 
+	eventInfoChannel := make(chan EventInfoRequest, 10)
+	eventTicketChannel := make(chan TicketRequest, 10)
+
+	ts := TicketServices{}
+
+	go eventInfoHandler(&ts, eventInfoChannel)
+	go eventTicketHandler(&ts, eventTicketChannel)
+
 	for i := 0; i < ticketBuyersNumber; i++ {
 		go ticketBuyer(i, cliChannels[i], orderChannel)
 	}
-	go loadBalancer(orderChannel)
+	go loadBalancer(orderChannel, eventInfoChannel, eventTicketChannel)
+
 
 	reader := bufio.NewReader(os.Stdin)
 
@@ -174,7 +172,6 @@ func main() {
 	for {
 		fmt.Print(" >>  ")
 		text, _ := reader.ReadString('\n')
-		// buyerID := strings.Split(text, " ")
 		buyerID, err := strconv.Atoi(strings.Split(text, " ")[0])
 		if err != nil {
 			printManual()

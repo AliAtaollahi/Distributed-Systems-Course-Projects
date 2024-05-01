@@ -1,3 +1,0 @@
-eventInfoHandler >> 2024/04/28 18:11:06 event info requested by 3
-eventInfoHandler >> 2024/04/28 18:11:27 event info requested by 1
-eventInfoHandler >> 2024/04/28 18:11:37 event info requested by 1
